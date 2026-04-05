@@ -195,10 +195,14 @@ cmd_up() {
         "docker-compose.yml" || true
 
     _section "Checking testbench.yaml"
-    if _copy_stub \
+    _copy_stub \
         "$WORKBENCH_SOURCE/testbench.yaml.stub" \
         "$PLUGIN_ROOT/testbench.yaml" \
-        "testbench.yaml"; then
+        "testbench.yaml" || true
+
+    # Fill providers whenever the stub placeholder is still present —
+    # handles both "new file" and "existing file that was never auto-filled".
+    if grep -q '# - Vendor\\YourPlugin\\YourPluginServiceProvider' "$PLUGIN_ROOT/testbench.yaml" 2>/dev/null; then
         _section "Auto-detecting providers from composer.json"
         _fill_providers "$PLUGIN_ROOT/testbench.yaml" "$PLUGIN_ROOT/composer.json"
     fi
