@@ -15,7 +15,10 @@ env:
   APP_DEBUG: true
 
   DB_CONNECTION: sqlite
+  # Para testes unitários (padrão — sem persistência entre requisições):
   DB_DATABASE: ":memory:"
+  # Para workbench serve (persistência entre requests HTTP):
+  # DB_DATABASE: "/var/www/html/workbench/database/database.sqlite"
 
   CACHE_STORE: array
   SESSION_DRIVER: array

@@ -1,7 +1,11 @@
 # docker-compose.yml — gerado a partir de packages/workbench/docker-compose.yml.stub
 #
 # Pré-requisitos:
+#   # Com HTTPS (recomendado — funciona sem chave SSH):
+#   git submodule add https://github.com/CoringaWc/filament-plugin-workbanch.git packages/workbench
+#   # Com SSH (requer chave SSH configurada no GitHub):
 #   git submodule add git@github.com:CoringaWc/filament-plugin-workbanch.git packages/workbench
+#
 #   git submodule update --init --recursive
 #
 # Variáveis de ambiente disponíveis via .env na raiz do plugin:

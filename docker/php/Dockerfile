@@ -26,6 +26,9 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN groupadd -g "${WWWGROUP}" workbench \
+    && useradd --no-log-init -u "${WWWUSER}" -g "${WWWGROUP}" -m workbench
+
 WORKDIR /var/www/html
 
 COPY --chmod=755 entrypoint.sh /usr/local/bin/plugin-workbench-entrypoint
