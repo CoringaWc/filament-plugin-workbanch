@@ -1,5 +1,12 @@
 FROM node:22-bookworm-slim@sha256:80fdb3f57c815e1b638d221f30a826823467c4a56c8f6a8d7aa091cd9b1675ea AS node
 
+# CVE-2026-33671: upgrade picomatch bundled in npm from 4.0.3 -> 4.0.4 before COPY
+RUN cd /tmp \
+    && npm pack picomatch@4.0.4 --quiet \
+    && tar xf /tmp/picomatch-4.0.4.tgz -C /tmp \
+    && cp -a /tmp/package/. /usr/local/lib/node_modules/npm/node_modules/picomatch/ \
+    && rm -rf /tmp/picomatch-4.0.4.tgz /tmp/package
+
 FROM php:8.4-cli-bookworm@sha256:15bd32b1c20ec9bb8edd09849745b5345105001b9780c873af7adae4e5d0cf54
 
 ARG WWWUSER=1000
@@ -23,9 +30,6 @@ RUN apt-get update \
     && ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
     && ln -sf /usr/local/lib/node_modules/corepack/dist/corepack.js /usr/local/bin/corepack \
-    && cd /tmp && npm install picomatch@4.0.4 --no-save --no-package-lock --loglevel=error \
-    && cp -a /tmp/node_modules/picomatch/. /usr/local/lib/node_modules/npm/node_modules/picomatch/ \
-    && rm -rf /tmp/node_modules /tmp/package-lock.json \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
