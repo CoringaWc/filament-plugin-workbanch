@@ -23,6 +23,9 @@ RUN apt-get update \
     && ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
     && ln -sf /usr/local/lib/node_modules/corepack/dist/corepack.js /usr/local/bin/corepack \
+    && cd /tmp && npm install picomatch@4.0.4 --no-save --no-package-lock --loglevel=error \
+    && cp -a /tmp/node_modules/picomatch/. /usr/local/lib/node_modules/npm/node_modules/picomatch/ \
+    && rm -rf /tmp/node_modules /tmp/package-lock.json \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
