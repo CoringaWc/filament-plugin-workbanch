@@ -30,6 +30,7 @@ services:
       NPM_CONFIG_CACHE: /tmp/.npm
       XDG_CACHE_HOME: /tmp/.cache
       WORKBENCH_PORT: ${WORKBENCH_PORT:-8001}
+      PHP_CLI_SERVER_WORKERS: ${PHP_CLI_SERVER_WORKERS:-4}
     ports:
       - "${WORKBENCH_PORT:-8001}:${WORKBENCH_PORT:-8001}"
     volumes:
