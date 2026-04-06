@@ -1,6 +1,6 @@
-FROM node:22-bookworm-slim AS node
+FROM node:22-bookworm-slim@sha256:80fdb3f57c815e1b638d221f30a826823467c4a56c8f6a8d7aa091cd9b1675ea AS node
 
-FROM php:8.4-cli-bookworm
+FROM php:8.4-cli-bookworm@sha256:15bd32b1c20ec9bb8edd09849745b5345105001b9780c873af7adae4e5d0cf54
 
 ARG WWWUSER=1000
 ARG WWWGROUP=1000
