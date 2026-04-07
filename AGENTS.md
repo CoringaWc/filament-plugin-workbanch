@@ -4,7 +4,10 @@
 
 This repository (`filament-plugin-workbench`) provides **shared Docker infrastructure** for developing FilamentPHP plugins. It does not contain a Laravel application or plugin code — it is a bootstrapping toolset.
 
-The primary deliverable is `bin/workbench`: a POSIX-sh CLI that any plugin developer can use to spin up a fully working testbench environment with a single command, requiring only Docker on the host machine.
+The primary deliverables are:
+
+- `bin/workbench`: a POSIX-sh CLI for environment lifecycle (up/down/install/fresh/logs/shell), requiring only Docker on the host
+- `bin/sail`: a Bash CLI for day-to-day development commands (artisan/phpunit/phpstan/pint/composer/php/node/npm), proxying them into the running Docker container — similar to Laravel Sail
 
 ---
 
@@ -13,7 +16,8 @@ The primary deliverable is `bin/workbench`: a POSIX-sh CLI that any plugin devel
 ```
 filament-plugin-workbench/
   bin/
-    workbench               ← POSIX sh CLI — the main deliverable
+    sail                    ← Bash CLI — Sail-like proxy for development commands
+    workbench               ← POSIX sh CLI — the environment lifecycle tool
   docker/
     php/
       Dockerfile            ← Generic PHP 8.4-cli + Node 22 + Composer 2 image
@@ -112,13 +116,64 @@ Do not add plugin-specific logic here. Keep it generic.
 
 ---
 
+## `bin/sail` — Architecture Rules
+
+### Language
+
+- **Bash** (`#!/usr/bin/env bash`, `set -euo pipefail`)
+- Uses `$BASH_SOURCE` for symlink resolution (Composer creates symlinks at `vendor/bin/sail`)
+
+### Purpose separation
+
+- `bin/workbench` = **environment lifecycle** (up/down/install/fresh/logs/shell) — POSIX sh, works without a running container
+- `bin/sail` = **development proxy** (artisan/phpunit/phpstan/pint/composer/php/node/npm) — Bash, requires a running container
+
+### Plugin root detection
+
+Resolves symlinks first (handles `vendor/bin/sail → ../../bin/sail`), then walks up from the resolved path to find `docker-compose.yml`.
+
+### TTY handling
+
+Detects terminal with `[ -t 0 ]` and passes `-it` or `-T` accordingly to `docker compose exec`.
+
+### Command dispatch
+
+| Category        | Commands                        | Target                                          |
+| --------------- | ------------------------------- | ----------------------------------------------- |
+| Artisan         | `artisan`                       | `php vendor/bin/testbench <args>`               |
+| Testing         | `phpunit`, `test`               | `vendor/bin/phpunit <args>`                     |
+| Analysis        | `phpstan`, `analyse`, `analyze` | `vendor/bin/phpstan analyse <args>`             |
+| Style           | `pint`, `lint`                  | `vendor/bin/pint <args>`                        |
+| Refactoring     | `rector`                        | `vendor/bin/rector <args>`                      |
+| Composer        | `composer`                      | `composer <args>`                               |
+| PHP             | `php`                           | `php <args>`                                    |
+| Node            | `node`, `npm`                   | `node <args>` / `npm <args>`                    |
+| Shell           | `shell`, `bash`                 | `bash`                                          |
+| Docker lifecycle| `up`, `down`, `build`, `logs`   | `docker compose <cmd>`                          |
+| Passthrough     | anything else                   | `docker compose exec php <cmd> <args>`          |
+
+### No host dependencies beyond Docker
+
+Same principle as `bin/workbench`: all commands run through `docker compose exec`.
+
+---
+
 ## Adding a New Subcommand
+
+### For `bin/workbench` (POSIX sh)
 
 1. Add a `cmd_<name>()` function in `bin/workbench`
 2. Add a `<name>)  cmd_<name> "$@" ;;` case in the entry-point `case` block (pass `"$@"` if the command accepts options)
 3. Add a help line in `cmd_help()`
 4. Update `README.md` commands table
 5. Run `sh -n bin/workbench` to validate POSIX sh syntax
+
+### For `bin/sail` (Bash)
+
+1. Add a new `case` entry in the command dispatch block
+2. Update the help output in the `[ $# -eq 0 ]` block
+3. Update `README.md` sail commands table
+4. Run `bash -n bin/sail` to validate syntax
 
 ---
 
@@ -188,15 +243,21 @@ Copies a stub file to `dest`. If `dest` already exists, prints `"$label already 
 Before committing:
 
 ```bash
-# Syntax check (no bash needed)
-sh -n bin/workbench
+# Syntax check
+sh -n bin/workbench    # POSIX sh
+bash -n bin/sail       # Bash
 
 # Functional test using the filament-acl plugin as reference
 cd /path/to/filament-acl
-git submodule update --remote packages/workbench
-./packages/workbench/bin/workbench down
-./packages/workbench/bin/workbench up
+./vendor/bin/workbench down
+./vendor/bin/workbench up
 # → Container must start and serve http://localhost:8001/admin
+
+# Test sail commands
+./vendor/bin/sail artisan --version
+./vendor/bin/sail phpunit --no-progress
+./vendor/bin/sail phpstan --memory-limit=1G
+./vendor/bin/sail pint --test
 ```
 
 ---
@@ -207,6 +268,8 @@ git submodule update --remote packages/workbench
 | ---------------------------------- | ---------------------------------------- | ------------- |
 | `Dockerfile`                       | ✅                                       | ❌            |
 | `entrypoint.sh`                    | ✅                                       | ❌            |
+| `bin/workbench` (lifecycle CLI)    | ✅                                       | ❌            |
+| `bin/sail` (development proxy)     | ✅                                       | ❌            |
 | `docker-compose.yml` (generated)   | Stub only                                | ✅            |
 | `testbench.yaml` (generated)       | Stub only                                | ✅            |
 | `workbench/` app (models, seeders) | ❌                                       | ✅            |

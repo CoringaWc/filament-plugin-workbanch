@@ -8,6 +8,7 @@ Provides:
 - **Entrypoint** with automatic dependency installation
 - **Templates** for `docker-compose.yml` and `testbench.yaml`
 - **`workbench` CLI** to start, stop, and manage the environment with a single command
+- **`sail` CLI** — Sail-like wrapper to run artisan, phpunit, phpstan, pint, and other commands inside the container
 
 > **Only prerequisite: Docker installed.** No PHP, Composer, or Node required on the host.
 
@@ -70,6 +71,55 @@ docker run --rm -v "$(pwd):/app" -w /app composer:2 require --dev coringawc/fila
 
 ---
 
+## `sail` — Day-to-Day Development CLI
+
+While `workbench` handles environment **lifecycle** (up/down/install), `sail` is a **Sail-like proxy** for running commands inside the already-running container. Available at `vendor/bin/sail` when installed via Composer.
+
+### Usage
+
+```bash
+./vendor/bin/sail <command> [arguments]
+```
+
+### Commands
+
+| Command                            | Description                                            |
+| ---------------------------------- | ------------------------------------------------------ |
+| `sail artisan <cmd>`               | Run a testbench artisan command                        |
+| `sail phpunit [args]` / `sail test`| Run PHPUnit tests                                      |
+| `sail phpstan [args]`              | Run PHPStan analysis                                   |
+| `sail pint [args]` / `sail lint`   | Run Laravel Pint                                       |
+| `sail rector [args]`               | Run Rector                                             |
+| `sail composer [args]`             | Run Composer                                           |
+| `sail php [args]`                  | Run PHP directly                                       |
+| `sail node [args]`                 | Run Node.js                                            |
+| `sail npm [args]`                  | Run npm                                                |
+| `sail shell`                       | Open a bash shell in the container                     |
+| `sail up`                          | Start the Docker containers                            |
+| `sail down`                        | Stop the Docker containers                             |
+| `sail build`                       | Build the Docker containers                            |
+| `sail logs`                        | Tail container logs                                    |
+| `sail <anything>`                  | Passed through to `docker compose exec`                |
+
+### Examples
+
+```bash
+# Artisan commands via testbench
+./vendor/bin/sail artisan migrate:fresh --seed
+./vendor/bin/sail artisan tinker
+
+# Testing & quality
+./vendor/bin/sail phpunit --testdox
+./vendor/bin/sail phpstan --memory-limit=1G
+./vendor/bin/sail pint --dirty
+
+# Composer & shell
+./vendor/bin/sail composer install
+./vendor/bin/sail shell
+```
+
+---
+
 ## Adding to a new plugin
 
 ```bash
@@ -109,6 +159,7 @@ my-plugin/
 | `docker-compose.yml.stub`     | **This package**                               | Template with `build.context` pre-configured                 |
 | `testbench.yaml.stub`         | **This package**                               | Template with common variables documented                    |
 | `bin/workbench`               | **This package**                               | Bootstrapping CLI                                            |
+| `bin/sail`                    | **This package**                               | Sail-like development proxy CLI                              |
 | `workbench/`                  | **In the plugin**                              | Plugin-specific models, seeders, policies, resources, etc.   |
 | `composer.json`               | **In the plugin**                              | Scripts `bootstrap:workbench`, `serve`, `fresh:workbench`    |
 | `testbench.yaml`              | **In the plugin**                              | Plugin-specific providers and env                            |
@@ -131,6 +182,7 @@ git commit -m "chore: bump filament-plugin-workbench"
 ```
 filament-plugin-workbench/
   bin/
+    sail                    ← Sail-like CLI for day-to-day commands (bash, artisan/phpunit/pint proxy)
     workbench               ← CLI (POSIX sh, requires only Docker on the host)
   docker/
     php/
