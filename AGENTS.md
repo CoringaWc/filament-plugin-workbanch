@@ -144,19 +144,19 @@ Detects terminal with `[ -t 0 ]` and passes `-it` or `-T` accordingly to `docker
 
 ### Command dispatch
 
-| Category        | Commands                        | Target                                          |
-| --------------- | ------------------------------- | ----------------------------------------------- |
-| Artisan         | `artisan`                       | `php vendor/bin/testbench <args>`               |
-| Testing         | `phpunit`, `test`               | `vendor/bin/phpunit <args>`                     |
-| Analysis        | `phpstan`, `analyse`, `analyze` | `vendor/bin/phpstan analyse <args>`             |
-| Style           | `pint`, `lint`                  | `vendor/bin/pint <args>`                        |
-| Refactoring     | `rector`                        | `vendor/bin/rector <args>`                      |
-| Composer        | `composer`                      | `composer <args>`                               |
-| PHP             | `php`                           | `php <args>`                                    |
-| Node            | `node`, `npm`                   | `node <args>` / `npm <args>`                    |
-| Shell           | `shell`, `bash`                 | `bash`                                          |
-| Docker lifecycle| `up`, `down`, `build`, `logs`   | `docker compose <cmd>`                          |
-| Passthrough     | anything else                   | `docker compose exec php <cmd> <args>`          |
+| Category         | Commands                        | Target                                 |
+| ---------------- | ------------------------------- | -------------------------------------- |
+| Artisan          | `artisan`                       | `php vendor/bin/testbench <args>`      |
+| Testing          | `phpunit`, `test`               | `vendor/bin/phpunit <args>`            |
+| Analysis         | `phpstan`, `analyse`, `analyze` | `vendor/bin/phpstan analyse <args>`    |
+| Style            | `pint`, `lint`                  | `vendor/bin/pint <args>`               |
+| Refactoring      | `rector`                        | `vendor/bin/rector <args>`             |
+| Composer         | `composer`                      | `composer <args>`                      |
+| PHP              | `php`                           | `php <args>`                           |
+| Node             | `node`, `npm`                   | `node <args>` / `npm <args>`           |
+| Shell            | `shell`, `bash`                 | `bash`                                 |
+| Docker lifecycle | `up`, `down`, `build`, `logs`   | `docker compose <cmd>`                 |
+| Passthrough      | anything else                   | `docker compose exec php <cmd> <args>` |
 
 ### No host dependencies beyond Docker
 
@@ -274,14 +274,14 @@ cd /path/to/filament-acl
 
 ## What Belongs Here vs. In the Plugin
 
-| Item                               | Here                                     | In the plugin |
-| ---------------------------------- | ---------------------------------------- | ------------- |
-| `Dockerfile`                       | ✅                                       | ❌            |
-| `entrypoint.sh`                    | ✅                                       | ❌            |
-| `bin/workbench` (lifecycle CLI)    | ✅                                       | ❌            |
-| `bin/sail` (development proxy)     | ✅                                       | ❌            |
-| `docker-compose.yml` (generated)   | Stub only                                | ✅            |
-| `testbench.yaml` (generated)       | Stub only                                | ✅            |
-| `workbench/` app (models, seeders) | ❌                                       | ✅            |
-| `composer.json` scripts            | Automatically injected by workbench      | ✅ (generated)|
-| Plugin-specific PHP logic          | ❌                                       | ✅            |
+| Item                               | Here                                | In the plugin  |
+| ---------------------------------- | ----------------------------------- | -------------- |
+| `Dockerfile`                       | ✅                                  | ❌             |
+| `entrypoint.sh`                    | ✅                                  | ❌             |
+| `bin/workbench` (lifecycle CLI)    | ✅                                  | ❌             |
+| `bin/sail` (development proxy)     | ✅                                  | ❌             |
+| `docker-compose.yml` (generated)   | Stub only                           | ✅             |
+| `testbench.yaml` (generated)       | Stub only                           | ✅             |
+| `workbench/` app (models, seeders) | ❌                                  | ✅             |
+| `composer.json` scripts            | Automatically injected by workbench | ✅ (generated) |
+| Plugin-specific PHP logic          | ❌                                  | ✅             |
