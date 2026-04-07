@@ -57,17 +57,17 @@ docker run --rm -v "$(pwd):/app" -w /app composer:2 require --dev --ignore-platf
 
 ## Available commands
 
-| Command                     | Description                                                                                    |
-| --------------------------- | ---------------------------------------------------------------------------------------------- |
-| `workbench up`              | Copy templates if needed, verify providers, inject scripts, start container, follow logs       |
-| `workbench up -d`           | Same as `up`, but starts in detached mode (does not block the terminal)                        |
-| `workbench install`         | Copy templates, fill providers, inject scripts into `composer.json` (no container start)       |
-| `workbench install --force` | Same as `install`, overwrites existing files without prompting                                 |
-| `workbench down`            | Stop and remove the container                                                                  |
-| `workbench fresh`           | Run `migrate:fresh --seed` inside the container                                                |
-| `workbench logs`            | Follow container logs in real time                                                             |
-| `workbench shell`           | Open an interactive shell inside the container                                                 |
-| `workbench help`            | Show help                                                                                      |
+| Command                     | Description                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| `workbench up`              | Copy templates if needed, verify providers, inject scripts, start container, follow logs |
+| `workbench up -d`           | Same as `up`, but starts in detached mode (does not block the terminal)                  |
+| `workbench install`         | Copy templates, fill providers, inject scripts into `composer.json` (no container start) |
+| `workbench install --force` | Same as `install`, overwrites existing files without prompting                           |
+| `workbench down`            | Stop and remove the container                                                            |
+| `workbench fresh`           | Run `migrate:fresh --seed` inside the container                                          |
+| `workbench logs`            | Follow container logs in real time                                                       |
+| `workbench shell`           | Open an interactive shell inside the container                                           |
+| `workbench help`            | Show help                                                                                |
 
 ---
 
@@ -83,23 +83,23 @@ While `workbench` handles environment **lifecycle** (up/down/install), `sail` is
 
 ### Commands
 
-| Command                            | Description                                            |
-| ---------------------------------- | ------------------------------------------------------ |
-| `sail artisan <cmd>`               | Run a testbench artisan command                        |
-| `sail phpunit [args]` / `sail test`| Run PHPUnit tests                                      |
-| `sail phpstan [args]`              | Run PHPStan analysis                                   |
-| `sail pint [args]` / `sail lint`   | Run Laravel Pint                                       |
-| `sail rector [args]`               | Run Rector                                             |
-| `sail composer [args]`             | Run Composer                                           |
-| `sail php [args]`                  | Run PHP directly                                       |
-| `sail node [args]`                 | Run Node.js                                            |
-| `sail npm [args]`                  | Run npm                                                |
-| `sail shell`                       | Open a bash shell in the container                     |
-| `sail up`                          | Start the Docker containers                            |
-| `sail down`                        | Stop the Docker containers                             |
-| `sail build`                       | Build the Docker containers                            |
-| `sail logs`                        | Tail container logs                                    |
-| `sail <anything>`                  | Passed through to `docker compose exec`                |
+| Command                             | Description                             |
+| ----------------------------------- | --------------------------------------- |
+| `sail artisan <cmd>`                | Run a testbench artisan command         |
+| `sail phpunit [args]` / `sail test` | Run PHPUnit tests                       |
+| `sail phpstan [args]`               | Run PHPStan analysis                    |
+| `sail pint [args]` / `sail lint`    | Run Laravel Pint                        |
+| `sail rector [args]`                | Run Rector                              |
+| `sail composer [args]`              | Run Composer                            |
+| `sail php [args]`                   | Run PHP directly                        |
+| `sail node [args]`                  | Run Node.js                             |
+| `sail npm [args]`                   | Run npm                                 |
+| `sail shell`                        | Open a bash shell in the container      |
+| `sail up`                           | Start the Docker containers             |
+| `sail down`                         | Stop the Docker containers              |
+| `sail build`                        | Build the Docker containers             |
+| `sail logs`                         | Tail container logs                     |
+| `sail <anything>`                   | Passed through to `docker compose exec` |
 
 ### Examples
 
@@ -153,17 +153,17 @@ my-plugin/
 
 ## What belongs where
 
-| File / Folder                 | Location                                       | Why                                                          |
-| ----------------------------- | ---------------------------------------------- | ------------------------------------------------------------ |
-| `Dockerfile`, `entrypoint.sh` | **This package** (`packages/workbench/docker/`)| Generic, reusable infrastructure                             |
-| `stubs/docker-compose.yml.stub` | **This package**                             | Template with `build.context` placeholder (resolved at copy) |
-| `stubs/testbench.yaml.stub`    | **This package**                             | Template with common variables documented                    |
-| `bin/workbench`               | **This package**                               | Bootstrapping CLI                                            |
-| `bin/sail`                    | **This package**                               | Sail-like development proxy CLI                              |
-| `workbench/`                  | **In the plugin**                              | Plugin-specific models, seeders, policies, resources, etc.   |
-| `composer.json`               | **In the plugin**                              | Scripts `bootstrap:workbench`, `serve`, `fresh:workbench`    |
-| `testbench.yaml`              | **In the plugin**                              | Plugin-specific providers and env                            |
-| `docker-compose.yml`          | **In the plugin**                              | Generated by `workbench up` — can be customised              |
+| File / Folder                   | Location                                        | Why                                                          |
+| ------------------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
+| `Dockerfile`, `entrypoint.sh`   | **This package** (`packages/workbench/docker/`) | Generic, reusable infrastructure                             |
+| `stubs/docker-compose.yml.stub` | **This package**                                | Template with `build.context` placeholder (resolved at copy) |
+| `stubs/testbench.yaml.stub`     | **This package**                                | Template with common variables documented                    |
+| `bin/workbench`                 | **This package**                                | Bootstrapping CLI                                            |
+| `bin/sail`                      | **This package**                                | Sail-like development proxy CLI                              |
+| `workbench/`                    | **In the plugin**                               | Plugin-specific models, seeders, policies, resources, etc.   |
+| `composer.json`                 | **In the plugin**                               | Scripts `bootstrap:workbench`, `serve`, `fresh:workbench`    |
+| `testbench.yaml`                | **In the plugin**                               | Plugin-specific providers and env                            |
+| `docker-compose.yml`            | **In the plugin**                               | Generated by `workbench up` — can be customised              |
 
 ---
 
