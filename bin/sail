@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+# ------------------------------------------------------------------
+# sail — Sail-like wrapper for orchestra/testbench inside Docker
+#
+# Provided by coringawc/filament-plugin-workbench.
+# Proxies day-to-day development commands into the running container.
+#
+# Usage:
+#   ./vendor/bin/sail <command> [arguments]
+#
+# Examples:
+#   ./vendor/bin/sail artisan migrate:fresh --seed
+#   ./vendor/bin/sail artisan tinker
+#   ./vendor/bin/sail phpunit --testdox
+#   ./vendor/bin/sail phpstan analyse --memory-limit=1G
+#   ./vendor/bin/sail pint --dirty
+#   ./vendor/bin/sail composer install
+#   ./vendor/bin/sail shell
+#   ./vendor/bin/sail up / down / build / logs
+# ------------------------------------------------------------------
+
+set -euo pipefail
+
+# ---------------------------------------------------------------------------
+# Resolve the plugin root (where docker-compose.yml lives)
+# ---------------------------------------------------------------------------
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+
+PROJECT_ROOT="$SCRIPT_DIR"
+while [ "$PROJECT_ROOT" != "/" ]; do
+    if [ -f "$PROJECT_ROOT/docker-compose.yml" ]; then
+        break
+    fi
+    PROJECT_ROOT="$(dirname "$PROJECT_ROOT")"
+done
+
+if [ ! -f "$PROJECT_ROOT/docker-compose.yml" ]; then
+    echo "Could not find docker-compose.yml in any parent directory." >&2
+    exit 1
+fi
+
+cd "$PROJECT_ROOT"
+
+# ---------------------------------------------------------------------------
+# Docker Compose command detection
+# ---------------------------------------------------------------------------
+if docker compose version > /dev/null 2>&1; then
+    DOCKER_COMPOSE="docker compose"
+elif command -v docker-compose > /dev/null 2>&1; then
+    DOCKER_COMPOSE="docker-compose"
+else
+    echo "Docker Compose is not installed." >&2
+    exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+SERVICE="php"
+
+if [ -t 0 ]; then
+    TTY="-it"
+else
+    TTY="-T"
+fi
+
+# ---------------------------------------------------------------------------
+# No arguments — show usage
+# ---------------------------------------------------------------------------
+if [ $# -eq 0 ]; then
+    echo "Usage: sail <command> [arguments]"
+    echo ""
+    echo "Commands:"
+    echo "  artisan <cmd>    Run a testbench artisan command"
+    echo "  phpunit [args]   Run PHPUnit tests"
+    echo "  phpstan [args]   Run PHPStan analysis"
+    echo "  pint [args]      Run Laravel Pint"
+    echo "  rector [args]    Run Rector"
+    echo "  composer [args]  Run Composer"
+    echo "  php [args]       Run PHP directly"
+    echo "  node [args]      Run Node.js"
+    echo "  npm [args]       Run npm"
+    echo "  shell            Open a bash shell in the container"
+    echo "  up               Start the Docker containers"
+    echo "  down             Stop the Docker containers"
+    echo "  build            Build the Docker containers"
+    echo "  logs             Tail container logs"
+    echo "  *                Any other command is passed through"
+    exit 0
+fi
+
+# ---------------------------------------------------------------------------
+# Command dispatch
+# ---------------------------------------------------------------------------
+COMMAND="$1"
+shift
+
+case "$COMMAND" in
+    # Container lifecycle
+    up)
+        $DOCKER_COMPOSE up -d "$@"
+        ;;
+    down)
+        $DOCKER_COMPOSE down "$@"
+        ;;
+    build)
+        $DOCKER_COMPOSE build "$@"
+        ;;
+    logs)
+        $DOCKER_COMPOSE logs -f "$@"
+        ;;
+
+    # Interactive shell
+    shell|bash)
+        $DOCKER_COMPOSE exec $TTY "$SERVICE" bash "$@"
+        ;;
+
+    # Artisan via testbench
+    artisan)
+        $DOCKER_COMPOSE exec $TTY "$SERVICE" php vendor/bin/testbench "$@"
+        ;;
+
+    # Testing & quality tools
+    phpunit|test)
+        $DOCKER_COMPOSE exec $TTY "$SERVICE" vendor/bin/phpunit "$@"
+        ;;
+    phpstan|analyse|analyze)
+        $DOCKER_COMPOSE exec $TTY "$SERVICE" vendor/bin/phpstan analyse "$@"
+        ;;
+    pint|lint)
+        $DOCKER_COMPOSE exec $TTY "$SERVICE" vendor/bin/pint "$@"
+        ;;
+    rector)
+        $DOCKER_COMPOSE exec $TTY "$SERVICE" vendor/bin/rector "$@"
+        ;;
+
+    # Composer
+    composer)
+        $DOCKER_COMPOSE exec $TTY "$SERVICE" composer "$@"
+        ;;
+
+    # Raw PHP
+    php)
+        $DOCKER_COMPOSE exec $TTY "$SERVICE" php "$@"
+        ;;
+
+    # Node.js / npm
+    node)
+        $DOCKER_COMPOSE exec $TTY "$SERVICE" node "$@"
+        ;;
+    npm)
+        $DOCKER_COMPOSE exec $TTY "$SERVICE" npm "$@"
+        ;;
+
+    # Anything else — pass through to docker compose exec
+    *)
+        $DOCKER_COMPOSE exec $TTY "$SERVICE" "$COMMAND" "$@"
+        ;;
+esac

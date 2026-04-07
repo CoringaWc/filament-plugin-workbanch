@@ -22,6 +22,7 @@
         "orchestra/workbench": "^10.0"
     },
     "bin": [
+        "bin/sail",
         "bin/workbench"
     ],
     "config": {
