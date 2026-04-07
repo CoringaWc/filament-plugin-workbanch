@@ -108,7 +108,7 @@ Do not add plugin-specific logic here. Keep it generic.
 ### `testbench.yaml.stub`
 
 - Must document the difference between `:memory:` (tests) and a file path (workbench serve)
-- Provider line must use the exact pattern `# - Vendor\YourPlugin\...` so `_fill_providers()` can replace it via regex
+- Provider line must use the exact pattern `# - Vendor\YourPlugin\...` so `_ensure_providers()` can replace it via regex
 
 ---
 
@@ -203,12 +203,12 @@ git submodule update --remote packages/workbench
 
 ## What Belongs Here vs. In the Plugin
 
-| Item                               | Here      | In the plugin |
-| ---------------------------------- | --------- | ------------- |
-| `Dockerfile`                       | ✅        | ❌            |
-| `entrypoint.sh`                    | ✅        | ❌            |
-| `docker-compose.yml` (generated)   | Stub only | ✅            |
-| `testbench.yaml` (generated)       | Stub only | ✅            |
-| `workbench/` app (models, seeders) | ❌        | ✅            |
-| `composer.json` scripts            | Injetados automaticamente pelo workbench | ✅ (gerado) |
-| Plugin-specific PHP logic          | ❌        | ✅            |
+| Item                               | Here                                     | In the plugin |
+| ---------------------------------- | ---------------------------------------- | ------------- |
+| `Dockerfile`                       | ✅                                       | ❌            |
+| `entrypoint.sh`                    | ✅                                       | ❌            |
+| `docker-compose.yml` (generated)   | Stub only                                | ✅            |
+| `testbench.yaml` (generated)       | Stub only                                | ✅            |
+| `workbench/` app (models, seeders) | ❌                                       | ✅            |
+| `composer.json` scripts            | Injetados automaticamente pelo workbench | ✅ (gerado)   |
+| Plugin-specific PHP logic          | ❌                                       | ✅            |

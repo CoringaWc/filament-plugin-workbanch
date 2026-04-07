@@ -28,12 +28,13 @@ git submodule update --init --recursive
 ./packages/workbench/bin/workbench up
 ```
 
-Ao executar `workbench up` pela primeira vez, o script:
+Ao executar `workbench up`, o script:
 
-- Copia `docker-compose.yml` (via template)
-- Copia `testbench.yaml` (via template) e preenche os providers do `composer.json`
+- Copia `docker-compose.yml` (via template, se ainda não existir)
+- Copia `testbench.yaml` (via template, se ainda não existir) e preenche os providers do `composer.json`
+- Verifica sempre se todos os providers e scripts do `composer.json` estão configurados
 - Faz o build da imagem Docker e inicia o container
-- Exibe os logs em tempo real
+- Exibe os logs em tempo real (use `-d` para não travar o terminal)
 
 ---
 

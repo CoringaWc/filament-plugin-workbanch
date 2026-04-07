@@ -86,6 +86,7 @@ if providers:
         messages.append('Providers set: '+', '.join(providers))
     else:
         added=[]
+        missing_key=False
         for p in providers:
             pattern='(?m)^\\s+-\\s+['+sq+chr(34)+']?'+re.escape(p)
             if not re.search(pattern,content):
@@ -93,10 +94,14 @@ if providers:
                 if idx>=0:
                     ins=idx+len('providers:'+chr(10))
                     content=content[:ins]+'  - '+sq+p+sq+chr(10)+content[ins:]
-                added.append(p)
+                    added.append(p)
+                else:
+                    missing_key=True
+        if missing_key:
+            messages.append('WARNING: providers: key not found in testbench.yaml — add the providers section manually.')
         if added:
             messages.append('Providers added: '+', '.join(added))
-        else:
+        elif not missing_key:
             messages.append('Providers already present.')
 else:
     messages.append('No providers found in extra.laravel.providers — edit testbench.yaml manually.')
@@ -110,19 +115,25 @@ if messages:
     print(chr(10).join(messages))"
 
     if command -v python3 > /dev/null 2>&1; then
-        result=$(python3 -c "$py_script" "$testbench_yaml" "$composer_json" 2>/dev/null || true)
-        if [ -n "$result" ]; then
-            printf "%s\n" "$result" | while IFS= read -r line; do
-                _info "$line"
-            done
+        if result=$(python3 -c "$py_script" "$testbench_yaml" "$composer_json" 2>&1); then
+            if [ -n "$result" ]; then
+                printf "%s\n" "$result" | while IFS= read -r line; do
+                    _info "$line"
+                done
+            fi
+        else
+            _warn "Failed to process testbench.yaml: $result"
         fi
     else
         _warn "python3 not found — using Docker to process testbench.yaml (one-time pull)"
         plugin_root="$(dirname "$composer_json")"
         yaml_rel="$(basename "$testbench_yaml")"
-        docker run --rm -v "${plugin_root}:/work" -w /work python:3-alpine \
-            python3 -c "$py_script" "$yaml_rel" composer.json 2>/dev/null || true
-        _info "Providers ensured from composer.json."
+        if docker run --rm -v "${plugin_root}:/work" -w /work python:3-alpine \
+                python3 -c "$py_script" "$yaml_rel" composer.json; then
+            _info "Providers processed via Docker python."
+        else
+            _warn "Docker python fallback failed — check providers in testbench.yaml manually."
+        fi
     fi
 }
 
@@ -155,13 +166,19 @@ else:
     print('Composer scripts already present.')"
 
     if command -v python3 > /dev/null 2>&1; then
-        result=$(python3 -c "$py_script" "$composer_json" 2>/dev/null || true)
-        [ -n "$result" ] && _info "$result"
+        if result=$(python3 -c "$py_script" "$composer_json" 2>&1); then
+            [ -n "$result" ] && _info "$result"
+        else
+            _warn "Failed to update composer.json scripts: $result"
+        fi
     else
         plugin_root="$(dirname "$composer_json")"
-        docker run --rm -v "${plugin_root}:/work" -w /work python:3-alpine \
-            python3 -c "$py_script" composer.json 2>/dev/null || true
-        _info "Composer scripts checked."
+        if docker run --rm -v "${plugin_root}:/work" -w /work python:3-alpine \
+                python3 -c "$py_script" composer.json; then
+            _info "Composer scripts checked via Docker python."
+        else
+            _warn "Docker python fallback failed — add scripts to composer.json manually."
+        fi
     fi
 }
 
