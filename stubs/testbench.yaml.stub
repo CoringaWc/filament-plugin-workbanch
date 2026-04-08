@@ -9,6 +9,9 @@
 providers:
   # - Vendor\YourPlugin\YourPluginServiceProvider
 
+discovers:
+  config: true
+
 env:
   APP_KEY: "base64:REPLACE_WITH_GENERATED_KEY"
   APP_ENV: testing
